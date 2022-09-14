@@ -4,6 +4,8 @@ Generates vanity/beautiful addresses for Pocket Network.
 
 As pocket network addresses are hex addresses, you can only look for hex characters (numbers + abcdef).
 
+It is recommended to not look for more than 5 characters per each pattern as it will take a long time to find a match.
+
 ## Installation
 
 1. [Install golang](https://go.dev/dl/)
