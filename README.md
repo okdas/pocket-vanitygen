@@ -2,6 +2,12 @@
 
 Generates vanity/beautiful addresses for Pocket Network.
 
+As pocket network addresses are hex addresses, you can only look for hex characters (numbers + abcdef).
+
+## Installation
+
+1. [Install golang](https://go.dev/dl/)
+2. `go install github.com/okdas/pocket-vanitygen@latest`
 
 ## Usage
 
