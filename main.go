@@ -1,3 +1,6 @@
+// once all possible numbers are generated (can be checked with `ls found | wc -l`),
+// run `cat found/*` to get all the found addresses
+
 package main
 
 import (
@@ -76,7 +79,7 @@ func main() {
 	go func() {
 		for newItem := range founds {
 			// fmt.Println("Found", newItem.number, newItem.address, newItem.pk)
-			writeLines([]string{newItem.address + ": " + newItem.pk}, "found/"+newItem.number)
+			writeLines([]string{"\"" + newItem.number + "\": " + newItem.pk + " # " + newItem.address}, "found/"+newItem.number)
 		}
 	}()
 
