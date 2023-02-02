@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"encoding/hex"
 	"flag"
 	"fmt"
 	"os"
+	"regexp"
 	"runtime"
 	"strings"
 	"sync"
@@ -17,6 +19,27 @@ import (
 func generateKeyAddressStrings() (string, string) {
 	privKey := crypto.PrivateKey(crypto.Ed25519PrivateKey{}).GenPrivateKey()
 	return privKey.RawString(), hex.EncodeToString(privKey.PubKey().Address().Bytes())
+}
+
+type found struct {
+	address string
+	pk      string
+	number  string
+}
+
+// writeLines writes the lines to the given file.
+func writeLines(lines []string, path string) error {
+	file, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	w := bufio.NewWriter(file)
+	for _, line := range lines {
+		fmt.Fprintln(w, line)
+	}
+	return w.Flush()
 }
 
 func main() {
@@ -48,6 +71,16 @@ func main() {
 		}
 	}()
 
+	founds := make(chan found, 100)
+
+	go func() {
+		for newItem := range founds {
+			// fmt.Println("Found", newItem.number, newItem.address, newItem.pk)
+			writeLines([]string{newItem.address + ": " + newItem.pk}, "found/"+newItem.number)
+		}
+	}()
+
+	r := regexp.MustCompile("^(\\d{3})04")
 	for i := 0; i < *cpusPtr; i++ {
 		wg.Add(1)
 		go func() {
@@ -55,10 +88,9 @@ func main() {
 				for i := 0; i < 1000; i++ {
 					counter.Incr(1000)
 					pk, addr := generateKeyAddressStrings()
-					for _, pattern := range patterns {
-						if strings.HasPrefix(addr, pattern[0]) && strings.HasSuffix(addr, pattern[1]) {
-							fmt.Println("Found", addr, pk)
-						}
+					if r.MatchString(addr) {
+						number := r.FindStringSubmatch(addr)[1]
+						founds <- found{addr, pk, number}
 					}
 				}
 
